@@ -1,0 +1,2 @@
+drop DischargeMortalityFlag
+rename DxCodeICD ECMO_dx_ICD
