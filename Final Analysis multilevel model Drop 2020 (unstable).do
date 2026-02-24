@@ -2244,6 +2244,8 @@ di .0070657*1.013237 /(.0070657*1.013237 + 1) * 100
 *upper*
 di .0070657*1.029229 /(.0070657*1.029229 + 1) * 100
  
+ 
+~~~~ 
 shell git add . 
 shell git commit -m"`c(current_time)' `c(current_date)'"
 shell git push
