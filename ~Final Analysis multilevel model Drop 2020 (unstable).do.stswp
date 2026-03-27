@@ -1689,7 +1689,7 @@ twoway ///
 	xlabel(1 "2016" 2 "2017" 3 "2018" 4 "2019" ///
            6 "2021" 7 "2022" 8 "2023" 9 "2024", angle(-45)) ///
     ytitle("Number of Cases") ///
-    legend(order(1 "Total Admissions (Mean = 418)"))
+    legend(order 1 "Total Admissions (Mean = 418)")
 
 reg annual_total_admissions_T1318 YearOfService 
 
