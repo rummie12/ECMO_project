@@ -1620,7 +1620,7 @@ twoway ///
            6 "2021" 7 "2022" 8 "2023" 9 "2024", angle(-45)) ///
     ytitle("Number of Cases") ///
 	yscale(log) ///
-    legend(order(1 "Total ECMO (Mean = 1,222)" 2 "Total Admissions (Mean = 109,698)"))
+    legend(order(1 "Total ECLS (Mean = 1,222)" 2 "Total Admissions (Mean = 109,698)"))
 restore
 ~pause
 
@@ -1689,7 +1689,7 @@ twoway ///
 	xlabel(1 "2016" 2 "2017" 3 "2018" 4 "2019" ///
            6 "2021" 7 "2022" 8 "2023" 9 "2024", angle(-45)) ///
     ytitle("Number of Cases") ///
-    legend(order 1 "Total Admissions (Mean = 418)")
+    legend(order(1 "Total Admissions (Mean = 418)"))
 
 reg annual_total_admissions_T1318 YearOfService 
 
@@ -1923,6 +1923,24 @@ melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.Ye
 *Margins Total ECMO*
 margins, at(center_totalecmo = (200(100)1000))
 
+*creation of multilevel model, fixed effects*
+melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions c.center_totalecmo c.number_of_casesonc c.number_of_casest1318 c.number_of_casestrauma ||HospitalNumber: , or 
+
+~pause
+
+
+*Margins Total ECMO in T13/18 Patients*
+margins, at(center_totalecmo = (200(100)1000) high_risk_group = 0)
+
+*Margins Total ECMO in Trauma Patients*
+margins, at(center_totalecmo = (200(100)1000) high_risk_group = 1)
+
+*Margins Total ECMO in Onc/HSCT Patients*
+margins, at(center_totalecmo = (200(100)1000) high_risk_group = 2)
+
+*Margins Total ECMO in Not-HR Patients*
+margins, at(center_totalecmo = (200(100)1000) high_risk_group = 3)
+
 ~pause
 ~pause
 **probabilities**
@@ -2001,6 +2019,7 @@ preserve
 bysort YearOfService: drop if YearOfService ==4 | YearOfService==5
 melogit ECMO_y_n ib3.high_risk_group i.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions c.center_totalecmo c.number_of_casesonc c.number_of_casest1318 c.number_of_casestrauma ||HospitalNumber: , or
 restore
+
 
 *margins center admissions*
 margins, at (center_admissions = (10000(1000)30000) high_risk_group = 2 ECMO_dx_y_n = 1 center_totalecmo = 361.6644 number_of_casesonc = 930.8248 number_of_casest1318 = 98.29036  number_of_casestrauma = 1803.592)
