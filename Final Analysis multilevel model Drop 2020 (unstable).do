@@ -1600,6 +1600,304 @@ reg annual_total_ECMO_onc YearOfService annual_total_admissions_onc
 restore
 
 
+**GENERATING CLUSTER LEVEL DATA**
+
+*All Patients*
+*Generating annual total admissions by center - all-comers*
+
+bysort HospitalNumber: gen center_admissions_by_year = center_admissions_2016 if YearOfService == 1
+bysort HospitalNumber: replace center_admissions_by_year = center_admissions_2017 if YearOfService == 2
+bysort HospitalNumber: replace center_admissions_by_year = center_admissions_2018 if YearOfService == 3
+bysort HospitalNumber: replace center_admissions_by_year = center_admissions_2019 if YearOfService == 4
+bysort HospitalNumber: replace center_admissions_by_year = center_admissions_2020 if YearOfService == 5
+bysort HospitalNumber: replace center_admissions_by_year = center_admissions_2021 if YearOfService == 6
+bysort HospitalNumber: replace center_admissions_by_year = center_admissions_2022 if YearOfService == 7
+bysort HospitalNumber: replace center_admissions_by_year = center_admissions_2023 if YearOfService == 8
+bysort HospitalNumber: replace center_admissions_by_year = center_admissions_2024 if YearOfService == 9
+replace center_admissions_by_year =0 if center_admissions_by_year==.
+
+*Generating annual total ECMO by center - all-comers*
+
+bysort HospitalNumber: gen center_annual_total_ecmo = center_total_ecmo_2016 if YearOfService == 1
+bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2017 if YearOfService == 2
+bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2018 if YearOfService == 3
+bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2019 if YearOfService == 4
+bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2020 if YearOfService == 5
+bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2021 if YearOfService == 6
+bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2022 if YearOfService == 7
+bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2023 if YearOfService == 8
+bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2024 if YearOfService == 9
+replace center_annual_total_ecmo =0 if center_annual_total_ecmo ==.
+
+*Generating Cluster level ECMO volume by Year*
+
+preserve
+bysort DischargeID: keep if ECMO_y_n==1
+bysort HospitalNumber YearOfService: keep if _n==1 
+
+mixed c.center_annual_total_ecmo||HospitalNumber:
+estat icc
+
+mixed c.center_annual_total_ecmo c.YearOfService||HospitalNumber:
+estat icc
+
+mixed c.center_annual_total_ecmo c.YearOfService c.center_admissions_by_year||HospitalNumber:
+estat icc
+
+restore
+
+
+*Not High Risk*
+**generating PICU admissions for Not-High Risk by Year**
+bysort HospitalNumber: egen center_admissions_2016_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==1 
+bysort HospitalNumber: egen center_admissions_2017_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==2 
+bysort HospitalNumber: egen center_admissions_2018_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==3 
+bysort HospitalNumber: egen center_admissions_2019_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==4 
+bysort HospitalNumber: egen center_admissions_2020_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==5 
+bysort HospitalNumber: egen center_admissions_2021_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==6 
+bysort HospitalNumber: egen center_admissions_2022_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==7 
+bysort HospitalNumber: egen center_admissions_2023_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==8 
+bysort HospitalNumber: egen center_admissions_2024_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==9 
+
+**generating PICU annual admissions for Not-High Risk**
+
+bysort HospitalNumber: gen center_admissions_nhr = center_admissions_2016_nhr if YearOfService ==1
+bysort HospitalNumber: replace center_admissions_nhr = center_admissions_2017_nhr if YearOfService ==2
+bysort HospitalNumber: replace center_admissions_nhr = center_admissions_2018_nhr if YearOfService ==3
+bysort HospitalNumber: replace center_admissions_nhr = center_admissions_2019_nhr if YearOfService ==4
+bysort HospitalNumber: replace center_admissions_nhr = center_admissions_2020_nhr if YearOfService ==5
+bysort HospitalNumber: replace center_admissions_nhr = center_admissions_2021_nhr if YearOfService ==6
+bysort HospitalNumber: replace center_admissions_nhr = center_admissions_2022_nhr if YearOfService ==7
+bysort HospitalNumber: replace center_admissions_nhr = center_admissions_2023_nhr if YearOfService ==8
+bysort HospitalNumber: replace center_admissions_nhr = center_admissions_2024_nhr if YearOfService ==9
+
+codebook center_admissions_nhr
+
+
+**generating ECMO for Not-high risk by Year**
+bysort HospitalNumber: egen center_total_ecmo_2016_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==1 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2017_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==2 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2018_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==3 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2019_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==4 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2020_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==5 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2021_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==6 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2022_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==7 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber YearOfService: egen center_total_ecmo_2023_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==8 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2024_nhr = count(DischargeID) if high_risk_group ==3 & YearOfService ==9 & ECMO_y_n ==1  & ECMO_y_n ==1
+
+**generating annual ECMO for Not-high risk**
+
+bysort HospitalNumber: gen center_annual_total_ecmo_nhr = center_total_ecmo_2016_nhr if YearOfService ==1
+bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_2017_nhr if YearOfService ==2
+bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_2018_nhr if YearOfService ==3
+bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_2019_nhr if YearOfService ==4
+bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_2020_nhr if YearOfService ==5
+bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_2021_nhr if YearOfService ==6
+bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_2022_nhr if YearOfService ==7
+bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_2023_nhr if YearOfService ==8
+bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_2024_nhr if YearOfService ==9
+replace center_annual_total_ecmo_nhr =0 if center_annual_total_ecmo_nhr ==.
+
+**Generating Cluster Regression**
+
+preserve
+
+bysort DischargeID: keep if ECMO_y_n==1 & center_annual_total_ecmo_nhr !=0
+bysort HospitalNumber YearOfService: keep if _n==1 
+
+tab HospitalNumber YearOfService if ECMO_y_n ==1
+
+mixed center_annual_total_ecmo_nhr c.center_admissions_nhr c.YearOfService||HospitalNumber:
+
+restore
+
+
+*Trisomy 1318*
+*generating PICU admissions for T1318 by year**
+bysort HospitalNumber: egen center_admissions_2016_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==1 | high_risk_group ==5 & YearOfService ==1
+bysort HospitalNumber: egen center_admissions_2017_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==2 | high_risk_group ==5 & YearOfService ==2
+bysort HospitalNumber: egen center_admissions_2018_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==3 | high_risk_group ==5 & YearOfService ==3
+bysort HospitalNumber: egen center_admissions_2019_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==4 | high_risk_group ==5 & YearOfService ==4
+bysort HospitalNumber: egen center_admissions_2020_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==5 | high_risk_group ==5 & YearOfService ==5
+bysort HospitalNumber: egen center_admissions_2021_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==6 | high_risk_group ==5 & YearOfService ==6
+bysort HospitalNumber: egen center_admissions_2022_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==7 | high_risk_group ==5 & YearOfService ==7
+bysort HospitalNumber: egen center_admissions_2023_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==8 | high_risk_group ==5 & YearOfService ==8
+bysort HospitalNumber: egen center_admissions_2024_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==9 | high_risk_group ==5 & YearOfService ==9
+
+
+*generating annual PICU admissions for T1318*
+
+bysort HospitalNumber: gen center_admissions_t1318 = center_admissions_2016_t1318 if YearOfService ==1
+bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2017_t1318 if YearOfService ==2
+bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2018_t1318 if YearOfService ==3
+bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2019_t1318 if YearOfService ==4
+bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2020_t1318 if YearOfService ==5
+bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2021_t1318 if YearOfService ==6
+bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2022_t1318 if YearOfService ==7
+bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2023_t1318 if YearOfService ==8
+bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2024_t1318 if YearOfService ==9
+
+
+*generating ECMO for T1318 by Year**
+bysort HospitalNumber: egen center_total_ecmo_2016_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==1 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==1 & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2017_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==2 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==2 & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2018_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==3 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==3 & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2019_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==4 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==4 & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2020_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==5 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==5 & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2021_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==6 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==6 & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2022_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==7 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==7 & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2023_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==8 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==8 & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2024_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==9 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==9 & ECMO_y_n ==1
+
+*generating annual ECMO for T1318*
+
+bysort HospitalNumber: gen center_annual_total_ecmo_t1318 = center_total_ecmo_2016_t1318 if YearOfService ==1
+bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2017_t1318 if YearOfService ==2
+bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2018_t1318 if YearOfService ==3
+bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2019_t1318 if YearOfService ==4
+bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2020_t1318 if YearOfService ==5
+bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2021_t1318 if YearOfService ==6
+bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2022_t1318 if YearOfService ==7
+bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2023_t1318 if YearOfService ==8
+bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2024_t1318 if YearOfService ==9
+replace center_annual_total_ecmo_t1318 =0 if center_annual_total_ecmo_t1318 ==.
+
+
+*generating cluster level analysis of ECMO volume*
+preserve
+
+bysort DischargeID: keep if ECMO_y_n==1 & center_annual_total_ecmo_t1318 !=0
+bysort HospitalNumber YearOfService: keep if _n==1 
+
+
+codebook center_annual_total_ecmo_t1318
+
+mixed center_annual_total_ecmo_t1318 c.center_admissions_t1318 c.YearOfService||HospitalNumber:
+
+restore
+
+
+*Trauma*
+**generating PICU admissions for T1318 by year**
+bysort HospitalNumber: egen center_admissions_2016_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==1 
+bysort HospitalNumber: egen center_admissions_2017_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==2 
+bysort HospitalNumber: egen center_admissions_2018_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==3 
+bysort HospitalNumber: egen center_admissions_2019_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==4 
+bysort HospitalNumber: egen center_admissions_2020_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==5 
+bysort HospitalNumber: egen center_admissions_2021_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==6 
+bysort HospitalNumber: egen center_admissions_2022_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==7 
+bysort HospitalNumber: egen center_admissions_2023_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==8 
+bysort HospitalNumber: egen center_admissions_2024_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==9 
+
+**generating annual PICU admissions for T1318**
+
+bysort HospitalNumber: gen center_admissions_trauma = center_admissions_2016_trauma if YearOfService ==1
+bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2017_trauma if YearOfService ==2
+bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2018_trauma if YearOfService ==3
+bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2019_trauma if YearOfService ==4
+bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2020_trauma if YearOfService ==5
+bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2021_trauma if YearOfService ==6
+bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2022_trauma if YearOfService ==7
+bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2023_trauma if YearOfService ==8
+bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2024_trauma if YearOfService ==9
+
+codebook center_admissions_trauma
+
+
+*generating ECMO for T1318 by Year*
+bysort HospitalNumber: egen center_total_ecmo_2016_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==1 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2017_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==2 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2018_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==3 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2019_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==4 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2020_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==5 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2021_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==6 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2022_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==7 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2023_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==8 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2024_trauma = count(DischargeID) if high_risk_group ==1 & YearOfService ==9 & ECMO_y_n ==1  & ECMO_y_n ==1
+
+
+*generating annual ECMO for T1318*
+bysort HospitalNumber: gen center_annual_total_ecmo_trauma = center_total_ecmo_2016_trauma if YearOfService ==1
+bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ecmo_2017_trauma if YearOfService ==2
+bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ecmo_2018_trauma if YearOfService ==3
+bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ecmo_2019_trauma if YearOfService ==4
+bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ecmo_2020_trauma if YearOfService ==5
+bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ecmo_2021_trauma if YearOfService ==6
+bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ecmo_2022_trauma if YearOfService ==7
+bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ecmo_2023_trauma if YearOfService ==8
+bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ecmo_2024_trauma if YearOfService ==9
+replace center_annual_total_ecmo_trauma =0 if center_annual_total_ecmo_trauma ==.
+
+
+*generating cluster level regression t1318*
+preserve
+
+bysort DischargeID: keep if ECMO_y_n==1 & center_annual_total_ecmo_trauma !=0
+bysort HospitalNumber YearOfService: keep if _n==1 
+mixed center_annual_total_ecmo_trauma c.center_admissions_trauma c.YearOfService||HospitalNumber:
+
+restore
+
+*Onc BMT*
+*generating PICU admissions for T1318 by year*
+bysort HospitalNumber: egen center_admissions_2016_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==1 
+bysort HospitalNumber: egen center_admissions_2017_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==2 
+bysort HospitalNumber: egen center_admissions_2018_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==3 
+bysort HospitalNumber: egen center_admissions_2019_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==4 
+bysort HospitalNumber: egen center_admissions_2020_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==5 
+bysort HospitalNumber: egen center_admissions_2021_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==6 
+bysort HospitalNumber: egen center_admissions_2022_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==7 
+bysort HospitalNumber: egen center_admissions_2023_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==8 
+bysort HospitalNumber: egen center_admissions_2024_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==9 
+
+*generating annual PICU admissions for T1318*
+
+bysort HospitalNumber: gen center_admissions_onc = center_admissions_2016_onc if YearOfService ==1
+bysort HospitalNumber: replace center_admissions_onc = center_admissions_2017_onc if YearOfService ==2
+bysort HospitalNumber: replace center_admissions_onc = center_admissions_2018_onc if YearOfService ==3
+bysort HospitalNumber: replace center_admissions_onc = center_admissions_2019_onc if YearOfService ==4
+bysort HospitalNumber: replace center_admissions_onc = center_admissions_2020_onc if YearOfService ==5
+bysort HospitalNumber: replace center_admissions_onc = center_admissions_2021_onc if YearOfService ==6
+bysort HospitalNumber: replace center_admissions_onc = center_admissions_2022_onc if YearOfService ==7
+bysort HospitalNumber: replace center_admissions_onc = center_admissions_2023_onc if YearOfService ==8
+bysort HospitalNumber: replace center_admissions_onc = center_admissions_2024_onc if YearOfService ==9
+
+
+*generating ECMO for T1318 by Year**
+bysort HospitalNumber: egen center_total_ecmo_2016_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==1 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2017_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==2 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2018_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==3 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2019_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==4 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2020_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==5 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2021_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==6 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2022_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==7 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2023_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==8 & ECMO_y_n ==1  & ECMO_y_n ==1
+bysort HospitalNumber: egen center_total_ecmo_2024_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==9 & ECMO_y_n ==1  & ECMO_y_n ==1
+
+*generating annual ECMO for T1318*
+bysort HospitalNumber: gen center_annual_total_ecmo_onc = center_total_ecmo_2016_onc if YearOfService ==1
+bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2017_onc if YearOfService ==2
+bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2018_onc if YearOfService ==3
+bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2019_onc if YearOfService ==4
+bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2020_onc if YearOfService ==5
+bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2021_onc if YearOfService ==6
+bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2022_onc if YearOfService ==7
+bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2023_onc if YearOfService ==8
+bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2024_onc if YearOfService ==9
+replace center_annual_total_ecmo_onc =0 if center_annual_total_ecmo_onc ==.
+
+*generating cluster regression for onc/bmt*
+
+preserve 
+
+bysort DischargeID: keep if ECMO_y_n==1 & center_annual_total_ecmo_onc !=0
+bysort HospitalNumber YearOfService: keep if _n==1 
+
+codebook center_annual_total_ecmo_onc
+
+mixed center_annual_total_ecmo_onc c.center_admissions_onc c.YearOfService||HospitalNumber:
+
+restore
 
 **SENSITIVITY ANALYSIS**
 
@@ -1913,7 +2211,19 @@ estimates store model1a
 
 *creation of empty model with fixed effects*
 melogit ECMO_y_n||HospitalNumber: , or
-estimates store modele2
+estimates store model2
+
+codebook ECMO_y_n
+codebook high_risk_group
+codebook Ethnicity
+codebook Gender
+codebook admitageyears
+codebook YearOfService
+codebook center_admissions
+codebook center_totalecmo
+codebook number_of_casesonc
+codebook number_of_casest1318
+codebook number_of_casestrauma
 
 *creation of multilevel model, fixed effects*
 melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions c.center_totalecmo c.number_of_casesonc c.number_of_casest1318 c.number_of_casestrauma ||HospitalNumber: , or 
@@ -1922,6 +2232,7 @@ melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.Ye
 
 *Margins Total ECMO*
 margins, at(center_totalecmo = (200(100)1000))
+
 
 *creation of multilevel model, fixed effects*
 melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions c.center_totalecmo c.number_of_casesonc c.number_of_casest1318 c.number_of_casestrauma ||HospitalNumber: , or 
