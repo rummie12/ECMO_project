@@ -1498,7 +1498,7 @@ reg annual_total_ECMO YearOfService annual_total_admissions
 
 restore
 
-~pause
+
 
 
 **Table 1 Data All Hospital Data - Not High Risk**
@@ -1629,6 +1629,12 @@ bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2023
 bysort HospitalNumber: replace center_annual_total_ecmo = center_total_ecmo_2024 if YearOfService == 9
 replace center_annual_total_ecmo =0 if center_annual_total_ecmo ==.
 
+*Assigning values to all patients*
+
+bysort DischargeID YearOfService(center_admissions_by_year): replace center_admissions_by_year = center_admissions_by_year[1]
+
+bysort HospitalNumber YearOfService(center_annual_total_ecmo): replace center_annual_total_ecmo = center_annual_total_ecmo[_N]
+
 *Generating Cluster level ECMO volume by Year*
 
 preserve
@@ -1698,6 +1704,10 @@ bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_
 bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_2024_nhr if YearOfService ==9
 replace center_annual_total_ecmo_nhr =0 if center_annual_total_ecmo_nhr ==.
 
+*Assigning values to all patients*
+bysort HospitalNumber YearOfService(center_admissions_nhr): replace center_admissions_nhr = center_admissions_nhr[1]
+bysort HospitalNumber YearOfService(center_annual_total_ecmo_nhr): replace center_annual_total_ecmo_nhr = center_annual_total_ecmo_nhr[_N]
+
 **Generating Cluster Regression**
 
 preserve
@@ -1762,6 +1772,9 @@ bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecm
 bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2024_t1318 if YearOfService ==9
 replace center_annual_total_ecmo_t1318 =0 if center_annual_total_ecmo_t1318 ==.
 
+*Assigning values to all patients*
+bysort HospitalNumber YearOfService(center_admissions_t1318): replace center_admissions_t1318 = center_admissions_t1318[1]
+bysort HospitalNumber YearOfService(center_annual_total_ecmo_t1318): replace center_annual_total_ecmo_t1318 = center_annual_total_ecmo_t1318[_N]
 
 *generating cluster level analysis of ECMO volume*
 preserve
@@ -1828,18 +1841,26 @@ bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ec
 bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ecmo_2024_trauma if YearOfService ==9
 replace center_annual_total_ecmo_trauma =0 if center_annual_total_ecmo_trauma ==.
 
+*assigning values to all patients*
+bysort HospitalNumber YearOfService(center_admissions_trauma): replace center_admissions_trauma = center_admissions_trauma[1]
+bysort HospitalNumber YearOfService(center_annual_total_ecmo_trauma): replace center_annual_total_ecmo_trauma = center_annual_total_ecmo_trauma[_N]
+tab HospitalNumber center_annual_total_ecmo_trauma
+help _N
 
-*generating cluster level regression t1318*
+
+*generating cluster level regression trauma*
 preserve
+bysort HospitalNumber YearOfService: keep if _n==1
+tab HospitalNumber YearOfService
+tab HospitalNumber center_annual_total_ecmo_trauma
 
-bysort DischargeID: keep if ECMO_y_n==1 & center_annual_total_ecmo_trauma !=0
-bysort HospitalNumber YearOfService: keep if _n==1 
 mixed center_annual_total_ecmo_trauma c.center_admissions_trauma c.YearOfService||HospitalNumber:
 
 restore
+~pause
 
 *Onc BMT*
-*generating PICU admissions for T1318 by year*
+*generating PICU admissions for onc by year*
 bysort HospitalNumber: egen center_admissions_2016_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==1 
 bysort HospitalNumber: egen center_admissions_2017_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==2 
 bysort HospitalNumber: egen center_admissions_2018_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==3 
@@ -1850,7 +1871,7 @@ bysort HospitalNumber: egen center_admissions_2022_onc = count(DischargeID) if h
 bysort HospitalNumber: egen center_admissions_2023_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==8 
 bysort HospitalNumber: egen center_admissions_2024_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==9 
 
-*generating annual PICU admissions for T1318*
+*generating annual PICU admissions for onc*
 
 bysort HospitalNumber: gen center_admissions_onc = center_admissions_2016_onc if YearOfService ==1
 bysort HospitalNumber: replace center_admissions_onc = center_admissions_2017_onc if YearOfService ==2
@@ -1863,7 +1884,7 @@ bysort HospitalNumber: replace center_admissions_onc = center_admissions_2023_on
 bysort HospitalNumber: replace center_admissions_onc = center_admissions_2024_onc if YearOfService ==9
 
 
-*generating ECMO for T1318 by Year**
+*generating ECMO for onc by Year**
 bysort HospitalNumber: egen center_total_ecmo_2016_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==1 & ECMO_y_n ==1  & ECMO_y_n ==1
 bysort HospitalNumber: egen center_total_ecmo_2017_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==2 & ECMO_y_n ==1  & ECMO_y_n ==1
 bysort HospitalNumber: egen center_total_ecmo_2018_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==3 & ECMO_y_n ==1  & ECMO_y_n ==1
@@ -1874,7 +1895,7 @@ bysort HospitalNumber: egen center_total_ecmo_2022_onc = count(DischargeID) if h
 bysort HospitalNumber: egen center_total_ecmo_2023_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==8 & ECMO_y_n ==1  & ECMO_y_n ==1
 bysort HospitalNumber: egen center_total_ecmo_2024_onc = count(DischargeID) if high_risk_group ==2 & YearOfService ==9 & ECMO_y_n ==1  & ECMO_y_n ==1
 
-*generating annual ECMO for T1318*
+*generating annual ECMO for onc*
 bysort HospitalNumber: gen center_annual_total_ecmo_onc = center_total_ecmo_2016_onc if YearOfService ==1
 bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2017_onc if YearOfService ==2
 bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2018_onc if YearOfService ==3
@@ -1885,6 +1906,10 @@ bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_
 bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2023_onc if YearOfService ==8
 bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_2024_onc if YearOfService ==9
 replace center_annual_total_ecmo_onc =0 if center_annual_total_ecmo_onc ==.
+
+*assigning values to all patients*
+bysort HospitalNumber YearOfService(center_admissions_onc): replace center_admissions_onc = center_admissions_onc[1]
+bysort HospitalNumber YearOfService(center_annual_total_ecmo_onc): replace center_annual_total_ecmo_onc = center_annual_total_ecmo_onc[_N]
 
 *generating cluster regression for onc/bmt*
 
@@ -1898,6 +1923,8 @@ codebook center_annual_total_ecmo_onc
 mixed center_annual_total_ecmo_onc c.center_admissions_onc c.YearOfService||HospitalNumber:
 
 restore
+
+~pause
 
 **SENSITIVITY ANALYSIS**
 
