@@ -1631,9 +1631,9 @@ replace center_annual_total_ecmo =0 if center_annual_total_ecmo ==.
 
 *Assigning values to all patients*
 
-bysort DischargeID YearOfService center_admissions_by_year: replace center_admissions_by_year = center_admissions_by_year[1]
+bysort DischargeID YearOfService(center_admissions_by_year): replace center_admissions_by_year = center_admissions_by_year[1]
 
-bysort HospitalNumber YearOfService center_annual_total_ecmo: replace center_annual_total_ecmo = center_annual_total_ecmo[_N]
+bysort HospitalNumber YearOfService(center_annual_total_ecmo): replace center_annual_total_ecmo = center_annual_total_ecmo[_N]
 
 *Generating Cluster level ECMO volume by Year*
 
@@ -1651,6 +1651,8 @@ mixed c.center_annual_total_ecmo c.YearOfService c.center_admissions_by_year||Ho
 estat icc
 
 restore
+
+
 
 
 *Not High Risk*
@@ -1705,8 +1707,8 @@ bysort HospitalNumber: replace center_annual_total_ecmo_nhr = center_total_ecmo_
 replace center_annual_total_ecmo_nhr =0 if center_annual_total_ecmo_nhr ==.
 
 *Assigning values to all patients*
-bysort HospitalNumber YearOfService center_admissions_nhr: replace center_admissions_nhr = center_admissions_nhr[1]
-bysort HospitalNumber YearOfService center_annual_total_ecmo_nhr: replace center_annual_total_ecmo_nhr = center_annual_total_ecmo_nhr[_N]
+bysort HospitalNumber YearOfService(center_admissions_nhr): replace center_admissions_nhr = center_admissions_nhr[1]
+bysort HospitalNumber YearOfService(center_annual_total_ecmo_nhr): replace center_annual_total_ecmo_nhr = center_annual_total_ecmo_nhr[_N]
 
 **Generating Cluster Regression**
 
@@ -1720,6 +1722,9 @@ tab HospitalNumber YearOfService if ECMO_y_n ==1
 mixed center_annual_total_ecmo_nhr c.center_admissions_nhr c.YearOfService||HospitalNumber:
 
 restore
+browse
+
+
 
 
 *Trisomy 1318*
@@ -1747,6 +1752,8 @@ bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2022_
 bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2023_t1318 if YearOfService ==8
 bysort HospitalNumber: replace center_admissions_t1318 = center_admissions_2024_t1318 if YearOfService ==9
 
+replace center_admissions_t1318 =0 if center_admissions_t1318 ==.
+
 
 *generating ECMO for T1318 by Year**
 bysort HospitalNumber: egen center_total_ecmo_2016_t1318 = count(DischargeID) if high_risk_group ==0 & YearOfService ==1 & ECMO_y_n ==1 | high_risk_group ==5 & YearOfService ==1 & ECMO_y_n ==1
@@ -1772,9 +1779,13 @@ bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecm
 bysort HospitalNumber: replace center_annual_total_ecmo_t1318 = center_total_ecmo_2024_t1318 if YearOfService ==9
 replace center_annual_total_ecmo_t1318 =0 if center_annual_total_ecmo_t1318 ==.
 
+
+
 *Assigning values to all patients*
-bysort HospitalNumber YearOfService center_admissions_t1318: replace center_admissions_t1318 = center_admissions_t1318[1]
-bysort HospitalNumber YearOfService center_annual_total_ecmo_t1318: replace center_annual_total_ecmo_t1318 = center_annual_total_ecmo_t1318[_N]
+bysort HospitalNumber YearOfService(center_admissions_t1318): replace center_admissions_t1318 = center_admissions_t1318[_N]
+bysort HospitalNumber YearOfService(center_annual_total_ecmo_t1318): replace center_annual_total_ecmo_t1318 = center_annual_total_ecmo_t1318[_N]
+
+tab center_admissions_t1318 YearOfService if HospitalNumber ==2008
 
 *generating cluster level analysis of ECMO volume*
 preserve
@@ -1788,6 +1799,8 @@ codebook center_annual_total_ecmo_t1318
 mixed center_annual_total_ecmo_t1318 c.center_admissions_t1318 c.YearOfService||HospitalNumber:
 
 restore
+tab high_risk_group YearOfService if high_risk_group ==0 & HospitalNumber ==2008
+~pause
 
 
 *Trauma*
@@ -1813,6 +1826,8 @@ bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2021
 bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2022_trauma if YearOfService ==7
 bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2023_trauma if YearOfService ==8
 bysort HospitalNumber: replace center_admissions_trauma = center_admissions_2024_trauma if YearOfService ==9
+
+replace center_admissions_trauma = 0 if center_admissions_trauma ==.
 
 codebook center_admissions_trauma
 
@@ -1842,11 +1857,11 @@ bysort HospitalNumber: replace center_annual_total_ecmo_trauma = center_total_ec
 replace center_annual_total_ecmo_trauma =0 if center_annual_total_ecmo_trauma ==.
 
 *assigning values to all patients*
-bysort HospitalNumber YearOfService(center_admissions_trauma): replace center_admissions_trauma = center_admissions_trauma[1]
+bysort HospitalNumber YearOfService(center_admissions_trauma): replace center_admissions_trauma = center_admissions_trauma[_N]
 bysort HospitalNumber YearOfService(center_annual_total_ecmo_trauma): replace center_annual_total_ecmo_trauma = center_annual_total_ecmo_trauma[_N]
 tab HospitalNumber center_annual_total_ecmo_trauma
 help _N
-~pause
+
 
 *generating cluster level regression trauma*
 preserve
@@ -1857,6 +1872,7 @@ tab HospitalNumber center_annual_total_ecmo_trauma
 mixed center_annual_total_ecmo_trauma c.center_admissions_trauma c.YearOfService||HospitalNumber:
 
 restore
+
 
 *Onc BMT*
 *generating PICU admissions for onc by year*
@@ -1881,6 +1897,8 @@ bysort HospitalNumber: replace center_admissions_onc = center_admissions_2021_on
 bysort HospitalNumber: replace center_admissions_onc = center_admissions_2022_onc if YearOfService ==7
 bysort HospitalNumber: replace center_admissions_onc = center_admissions_2023_onc if YearOfService ==8
 bysort HospitalNumber: replace center_admissions_onc = center_admissions_2024_onc if YearOfService ==9
+
+replace center_admissions_onc = 0 if center_admissions_onc ==.
 
 
 *generating ECMO for onc by Year**
@@ -1907,7 +1925,7 @@ bysort HospitalNumber: replace center_annual_total_ecmo_onc = center_total_ecmo_
 replace center_annual_total_ecmo_onc =0 if center_annual_total_ecmo_onc ==.
 
 *assigning values to all patients*
-bysort HospitalNumber YearOfService(center_admissions_onc): replace center_admissions_onc = center_admissions_onc[1]
+bysort HospitalNumber YearOfService(center_admissions_onc): replace center_admissions_onc = center_admissions_onc[_N]
 bysort HospitalNumber YearOfService(center_annual_total_ecmo_onc): replace center_annual_total_ecmo_onc = center_annual_total_ecmo_onc[_N]
 
 *generating cluster regression for onc/bmt*
@@ -1923,7 +1941,6 @@ mixed center_annual_total_ecmo_onc c.center_admissions_onc c.YearOfService||Hosp
 
 restore
 
-~pause
 
 **SENSITIVITY ANALYSIS**
 
@@ -2245,89 +2262,81 @@ codebook Ethnicity
 codebook Gender
 codebook admitageyears
 codebook YearOfService
-codebook center_admissions
-codebook center_totalecmo
-codebook number_of_casesonc
-codebook number_of_casest1318
-codebook number_of_casestrauma
-
-*creation of multilevel model, fixed effects*
-melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions c.center_totalecmo c.number_of_casesonc c.number_of_casest1318 c.number_of_casestrauma ||HospitalNumber: , or 
+codebook center_admissions_by_year
+codebook center_annual_total_ecmo
+codebook center_admissions_onc
+codebook center_admissions_t1318
+codebook center_admissions_trauma
 
 ~pause
+
+*creation of multilevel model, fixed effects*
+melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year c.center_annual_total_ecmo c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
 
 *Margins Total ECMO*
-margins, at(center_totalecmo = (200(100)1000))
+margins, at(center_annual_total_ecmo = (20(10)100))
 
-
-*creation of multilevel model, fixed effects*
-melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions c.center_totalecmo c.number_of_casesonc c.number_of_casest1318 c.number_of_casestrauma ||HospitalNumber: , or 
-
-~pause
+melogit, nolog
+*Margins Center Admissions*
+margins, at(center_admissions_by_year = (100(100)2000))
 
 
 *Margins Total ECMO in T13/18 Patients*
-margins, at(center_totalecmo = (200(100)1000) high_risk_group = 0)
+margins, at(center_annual_total_ecmo = (200(100)1000) high_risk_group = 0)
 
 *Margins Total ECMO in Trauma Patients*
-margins, at(center_totalecmo = (200(100)1000) high_risk_group = 1)
+margins, at(center_annual_total_ecmo = (200(100)1000) high_risk_group = 1)
 
 *Margins Total ECMO in Onc/HSCT Patients*
-margins, at(center_totalecmo = (200(100)1000) high_risk_group = 2)
+margins, at(center_annual_total_ecmo = (200(100)1000) high_risk_group = 2)
 
 *Margins Total ECMO in Not-HR Patients*
-margins, at(center_totalecmo = (200(100)1000) high_risk_group = 3)
+margins, at(center_annual_total_ecmo = (200(100)1000) high_risk_group = 3)
 
 ~pause
-~pause
+
 **probabilities**
 *baseline*
-di .0070657/(1+.0070657) *100
+di .0094521 /(1+.0094521) *100
 *High Risk Groups*
 *T13/18 probability*
-di .0070657*.4386876  /(.0070657*.4386876  + 1) * 100
+di .0094521*.4340937/(.0094521*.4340937  + 1) * 100
 *Trauma probability*
-di .0070657*2.164056  /(.0070657*2.164056  + 1) * 100
+di .0094521*2.150589/(.0094521*2.150589   + 1) * 100
 *Onc probability*
-di .0070657*.3523613  /(.0070657*.3523613  + 1) * 100
+di .0094521*.3528841 /(.0094521*.3528841  + 1) * 100
 
 ~pause
+
 **CI**
 *High Risk Groups*
 *baseline*
 *lower*
-di .0057431  / (.0057431+1)*100
+di .0081158/(.0081158+1)*100
 *upper*
-di .0086929/ (.0086929 + 1)*100
+di .0110084/(.0110084+1)*100
 *T1318 CI*
 *lower*
-di .0070657*.2680969 /(.0070657*.2680969  + 1) * 100
+di .0094521*.2680969/(.0094521*.2652378+1) * 100
 *upper*
-di .0070657*.7178255 /(.0070657*.7178255 + 1) * 100
+di .0094521*.7178255/(.0094521*.7104467+1) * 100
 
 *Trauma CI*
 *lower*
-di .0070657*2.033026  /(.0070657*2.033026  + 1) * 100
+di .0094521*2.033026/(.0094521*2.020166+1) * 100
 *upper*
-di .0070657*2.303532 /(.0070657*2.303532 + 1) * 100
+di .0094521*2.303532/(.0094521*2.289432+1) * 100
 
 *Onc/HSCT*
 *lower*
-di .0070657*.2878782 /(.0070657*.2878782 + 1) * 100
+di .0094521*.2878782/(.0094521*.2882862+1) * 100
 *upper*
-di .0070657*.4312882 /(.0070657*.4312882 + 1) * 100
+di .0094521*.4312882/(.0094521*.4319568+1) * 100
 
 ~pause
-melogit
-*Margins Center Admissions*
-margins, at(center_admissions = (10000(5000)30000))
-
-
 
 **MARGINS ECMO_dx_y_n**
-
 margins, at (ECMO_dx_y_n = 1)
-
 
 **MARGINS T1318**
 *margins center admissions*
@@ -2456,6 +2465,8 @@ preserve
 bysort DischargeID: keep if high_risk_group ==0
 bysort HospitalNumber: egen center_admissions_T1318 = count(DischargeID)
 restore
+browsea
+~pause
 
 *trauma*
 preserve
@@ -2580,38 +2591,103 @@ di .0070657*1.021202 /(.0070657*1.021202  + 1) * 100
 
 ~pause
 ~pause
+**probabilities for baseline characteristics**
+*baseline*
+di .0094521 /(1+.0094521) *100
+*Ethnicity*
+*White*
+di .0094521*1.078656  /(.0094521*1.078656  + 1) * 100
+
+
+*Gender*
+
+*Female*
+di .0094521* 1.151565/(.0094521* 1.151565 + 1) * 100
+
+~pause
+*Age*
+di .0094521*.950508 /(.0094521*.950508  + 1) * 100
+
+*Year of Service*
+di .0094521*1.021202 /(.0094521*1.006275   + 1) * 100
+
+~pause
+~pause
 **CI**
 *High Risk Groups*
 *baseline*
 *lower*
-di .0057431  / (.0057431+1)*100
+di .0081158/(.0081158+1)*100
 *upper*
-di .0086929/ (.0086929 + 1)*100
+di .0110084/(.0110084+1)*100
+
 *Ethnicity*
 *White*
-di .0070657* 1.02757 /(.0070657* 1.02757 + 1) * 100
+di .0094521* 1.019961   /(.0094521* 1.019961   + 1) * 100
 *upper*
-di .0070657*1.148948 /(.0070657*1.148948 + 1) * 100
+di .0094521*1.14073 /(.0094521*1.14073 + 1) * 100
 ~pause
 
 *Gender*
 *Female*
 *lower*
-di .0070657*1.10408  /(.0070657*1.10408   + 1) * 100
+di .0094521*1.104197 /(.0094521*1.104197+ 1) * 100
 *upper*
-di .0070657*1.200789 /(.0070657*1.200789 + 1) * 100
+di .0094521*1.200965/(.0094521*1.200965+ 1) * 100
 
 *Age*
 *lower*
-di .0070657*.9474027 /(.0070657*.9474027 + 1) * 100
+di .0094521*.9470967/(.0094521*.9470967+1) * 100
 *upper*
-di .0070657*.9542715 /(.0070657*.9542715 + 1) * 100
+di .0094521*.9539316/(.0094521*.9539316+1) * 100
 
 *Year*
 *lower*
-di .0070657*1.013237 /(.0070657*1.013237 + 1) * 100
+di .0094521*.9971312/(.0094521*.9971312+1) * 100
 *upper*
-di .0070657*1.029229 /(.0070657*1.029229 + 1) * 100
+di .0094521*1.015502/(.0094521*1.015502+1) * 100
+ 
+ 
+**probabilities by center volume by "high-risk" diagnosis**
+*baseline*
+di .0094521 /(1+.0094521) *100
+
+**onc**
+di .0094521* 1.000498/(.0094521*1.000498+ 1) * 100
+
+**t13/18**
+di .0094521* .9977184/(.0094521*.9977184+ 1) * 100
+
+**trauma**
+di .0094521* 1.000911/(.0094521*1.000911+ 1) * 100
+
+**CI**
+*High Risk Groups*
+*baseline*
+*lower*
+di .0081158/(.0081158+1)*100
+*upper*
+di .0110084/(.0110084+1)*100
+
+*onc*
+*lower*
+di .0094521* .9995351/(.0094521*.9995351+1) * 100
+*upper*
+di .0094521*1.001463/(.0094521*1.001463+1) * 100
+
+*t13/18*
+*lower*
+di .0094521* .9931351 /(.0094521*.9931351 +1) * 100
+*upper*
+di .0094521*1.002323/(.0094521*1.002323+1) * 100
+
+*trauma*
+*lower*
+di .0094521* 1.000124 /(.0094521*1.000124 +1) * 100
+*upper*
+di .0094521*1.001697/(.0094521*1.001697+1) * 100
+
+
  
  
 ~~~~ 
