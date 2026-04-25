@@ -92,7 +92,7 @@ tab AdmitYear YearOfService
 
 replace AdmitYear = YearOfService if AdmitYear ==.
 replace YearOfService = AdmitYear if YearOfService ==.
-drop if YearOfService == 5
+
 
 
 gen high_risk_group =.
@@ -1453,7 +1453,7 @@ replace ECMO_mortality_count_onc = ECMO_mortality_count_onc[1]
 
 drop if HospitalNumber ==.
 drop if DischargeID ==.
-drop if YearOfService == 5
+
 
 **Table 1**
 
@@ -1649,6 +1649,8 @@ estat icc
 
 mixed c.center_annual_total_ecmo c.YearOfService c.center_admissions_by_year||HospitalNumber:
 estat icc
+
+tab YearOfService HospitalNumber
 
 restore
 
@@ -2270,8 +2272,11 @@ codebook center_admissions_trauma
 
 ~pause
 
+
 *creation of multilevel model, fixed effects*
 melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year c.center_annual_total_ecmo c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
+
+restore
 
 *Margins Total ECMO*
 margins, at(center_annual_total_ecmo = (20(10)100))
