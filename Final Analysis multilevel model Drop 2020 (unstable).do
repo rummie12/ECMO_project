@@ -2274,14 +2274,36 @@ codebook center_admissions_trauma
 *creation of multilevel model, fixed effects*
 melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year c.center_annual_total_ecmo c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
 
+~pause
+
+preserve
+gen center_admissions_by_year_500 =.
+replace center_admissions_by_year_500 = center_admissions_by_year/500
+gen center_annual_total_ecmo_25 = center_annual_total_ecmo/25
+melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year_500 c.center_annual_total_ecmo_25 c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
+predict yhat at center_admissions_by_year_500 = 4
+
+
 restore
 
+~pause
+
+*creation of multilevel model, fixed effects*
+melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year c.center_annual_total_ecmo c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
+
 *Margins Total ECMO*
-margins, at(center_annual_total_ecmo = (20(10)100))
+margins, at(center_annual_total_ecmo = (0(25)100))
 
 melogit, nolog
 *Margins Center Admissions*
 margins, at(center_admissions_by_year = (100(100)2000))
+
+*Margins Total ECMO*
+margins, at(center_annual_total_ecmo = (20(10)100) high_risk_group ==3)
+
+melogit, nolog
+*Margins Center Admissions*
+margins, at(center_admissions_by_year = (100(100)2000) high_risk_group ==3)
 
 
 *Margins Total ECMO in T13/18 Patients*
@@ -2571,28 +2593,7 @@ bysort DischargeID: keep if high_risk_group ==3
 codebook HospitalNumber
 restore
 
-**probabilities for baseline characteristics**
-*baseline*
-di .0070657/(1+.0070657) *100
-*Ethnicity*
-*White*
-di .0070657*1.086566 /(.0070657*1.086566 + 1) * 100
 
-
-*Gender*
-*Male*
-di .0070657*<> /(.0070657*<>  + 1) * 100
-*Female*
-di .0070657* 1.151419   /(.0070657* 1.151419   + 1) * 100
-
-~pause
-*Age*
-di .0070657*.9508309 /(.0070657*.9508309  + 1) * 100
-
-*Year of Service*
-di .0070657*1.021202 /(.0070657*1.021202  + 1) * 100
-
-~pause
 ~pause
 **probabilities for baseline characteristics**
 *baseline*
@@ -2638,18 +2639,22 @@ di .0094521*1.104197 /(.0094521*1.104197+ 1) * 100
 *upper*
 di .0094521*1.200965/(.0094521*1.200965+ 1) * 100
 
+~pause
+
 *Age*
 *lower*
 di .0094521*.9470967/(.0094521*.9470967+1) * 100
 *upper*
 di .0094521*.9539316/(.0094521*.9539316+1) * 100
 
+~pause
 *Year*
 *lower*
 di .0094521*.9971312/(.0094521*.9971312+1) * 100
 *upper*
 di .0094521*1.015502/(.0094521*1.015502+1) * 100
  
+ ~pause
  
 **probabilities by center volume by "high-risk" diagnosis**
 *baseline*
