@@ -1710,7 +1710,7 @@ replace center_annual_total_ecmo_nhr =0 if center_annual_total_ecmo_nhr ==.
 bysort HospitalNumber YearOfService(center_admissions_nhr): replace center_admissions_nhr = center_admissions_nhr[1]
 bysort HospitalNumber YearOfService(center_annual_total_ecmo_nhr): replace center_annual_total_ecmo_nhr = center_annual_total_ecmo_nhr[_N]
 
-**Generating Cluster Regression**
+**Generating Cluster Regression NHR**
 
 preserve
 
@@ -1787,7 +1787,7 @@ bysort HospitalNumber YearOfService(center_annual_total_ecmo_t1318): replace cen
 
 tab center_admissions_t1318 YearOfService if HospitalNumber ==2008
 
-*generating cluster level analysis of ECMO volume*
+*generating cluster level analysis of ECMO volume T13/18*
 preserve
 
 bysort DischargeID: keep if ECMO_y_n==1 & center_annual_total_ecmo_t1318 !=0
@@ -1800,7 +1800,7 @@ mixed center_annual_total_ecmo_t1318 c.center_admissions_t1318 c.YearOfService||
 
 restore
 tab high_risk_group YearOfService if high_risk_group ==0 & HospitalNumber ==2008
-~pause
+
 
 
 *Trauma*
@@ -1865,7 +1865,8 @@ help _N
 
 *generating cluster level regression trauma*
 preserve
-bysort HospitalNumber YearOfService: keep if _n==1
+bysort DischargeID: keep if ECMO_y_n ==1
+bysort HospitalNumber YearOfService: keep if _n==1 
 tab HospitalNumber YearOfService
 tab HospitalNumber center_annual_total_ecmo_trauma
 
@@ -1941,7 +1942,7 @@ mixed center_annual_total_ecmo_onc c.center_admissions_onc c.YearOfService||Hosp
 
 restore
 
-
+~pause
 **SENSITIVITY ANALYSIS**
 
 *All Patients COVID effect dropping 2020*
@@ -2277,12 +2278,10 @@ melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.Ye
 ~pause
 
 preserve
-gen center_admissions_by_year_500 =.
-replace center_admissions_by_year_500 = center_admissions_by_year/500
+gen center_admissions_by_year_2000 =.
+replace center_admissions_by_year_2000 = center_admissions_by_year/2000
 gen center_annual_total_ecmo_25 = center_annual_total_ecmo/25
-melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year_500 c.center_annual_total_ecmo_25 c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
-predict yhat at center_admissions_by_year_500 = 4
-
+melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year_2000 c.center_annual_total_ecmo_25 c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
 
 restore
 
@@ -2290,33 +2289,96 @@ restore
 
 *creation of multilevel model, fixed effects*
 melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year c.center_annual_total_ecmo c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
-
+~pause
 *Margins Total ECMO*
 margins, at(center_annual_total_ecmo = (0(25)100))
 
-melogit, nolog
-*Margins Center Admissions*
-margins, at(center_admissions_by_year = (100(100)2000))
+*creation of multilevel model, fixed effects*
+melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year c.center_annual_total_ecmo c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
 
 *Margins Total ECMO*
-margins, at(center_annual_total_ecmo = (20(10)100) high_risk_group ==3)
+margins, at(center_annual_total_ecmo = (0(25)100) high_risk_group ==3)
+marginsplot
+~pause
 
 melogit, nolog
 *Margins Center Admissions*
-margins, at(center_admissions_by_year = (100(100)2000) high_risk_group ==3)
+margins, at(center_admissions_by_year = (0(500)4000))
+
+~pause
+**ECMO MARGINS**
+
+*creation of multilevel model, fixed effects*
+melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year c.center_annual_total_ecmo c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
+
+**margins total ECMO trisomy 13/18**
+melogit, nolog
+margins, at(center_annual_total_ecmo = (0(25)100) high_risk_group  ==0)
+est store model_t13
 
 
-*Margins Total ECMO in T13/18 Patients*
-margins, at(center_annual_total_ecmo = (200(100)1000) high_risk_group = 0)
+**margins total ECMO trisomy trauma**
+melogit, nolog
+margins, at(center_annual_total_ecmo = (0(25)100) high_risk_group  ==1)
+est store model_trauma
 
-*Margins Total ECMO in Trauma Patients*
-margins, at(center_annual_total_ecmo = (200(100)1000) high_risk_group = 1)
+**margins total ECMO trisomy onc**
+melogit, nolog
+margins, at(center_annual_total_ecmo = (0(25)100) high_risk_group  ==2)
+est store model_onc
 
-*Margins Total ECMO in Onc/HSCT Patients*
-margins, at(center_annual_total_ecmo = (200(100)1000) high_risk_group = 2)
+**margins total ECMO NHR**
+melogit, nolog
+margins, at(center_annual_total_ecmo = (0(25)100) high_risk_group  ==3)
+est store model_nhr
 
-*Margins Total ECMO in Not-HR Patients*
-margins, at(center_annual_total_ecmo = (200(100)1000) high_risk_group = 3)
+plot model_t13 model_trauma model_onc, at xtitle("Center Annual ECLS Volume")
+
+**creating margins graphs**
+
+melogit ECMO_y_n ib3.high_risk_group ib1.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions_by_year c.center_annual_total_ecmo c.center_admissions_onc c.center_admissions_t1318 c.center_admissions_trauma||HospitalNumber: , or 
+
+preserve
+melogit, nolog
+margins, at(center_annual_total_ecmo = (0(25)100) high_risk_group ==0)
+marginsplot, name(plot_t13, replace)
+
+melogit, nolog
+margins, at(center_annual_total_ecmo = (0(25)100) high_risk_group ==1)
+marginsplot, name(plot_trauma, replace)
+
+melogit, nolog
+margins, at(center_annual_total_ecmo = (0(25)100) high_risk_group ==2)
+marginsplot, name(plot_onc, replace)
+
+melogit, nolog
+margins, at(center_annual_total_ecmo = (0(25)100) high_risk_group ==3)
+marginsplot, name(plot_nhr, replace)
+
+graph combine plot_t13 plot_trauma plot_onc plot_nhr, ///
+    xtitle("Center Annual ECLS Volume")
+restore
+
+
+
+~pause
+
+**ADMISSIONS MARGINS**
+*Margins Center Admissions NHR*
+melogit, nolog
+margins, at(center_admissions_by_year = (0(500)4000) high_risk_group ==3)
+
+*Margins Center Admissions trisomy 13/18*
+melogit, nolog
+margins, at(center_admissions_by_year = (0(500)4000) high_risk_group ==0)
+
+*Margins Center Admissions trauma*
+melogit, nolog
+margins, at(center_admissions_by_year = (0(500)4000) high_risk_group ==1)
+
+*Margins Center Admissions trisomy onc*
+melogit, nolog
+margins, at(center_admissions_by_year = (0(500)4000) high_risk_group ==2)
 
 ~pause
 
@@ -2360,86 +2422,7 @@ di .0094521*.4312882/(.0094521*.4319568+1) * 100
 
 ~pause
 
-**MARGINS ECMO_dx_y_n**
-margins, at (ECMO_dx_y_n = 1)
-
-**MARGINS T1318**
-*margins center admissions*
-margins, at(center_admissions = (10000(1000)30000) high_risk_group = 0 ECMO_dx_y_n = 1 center_totalecmo = 361.6644 number_of_casesonc = 930.8248 number_of_casest1318 = 98.29036  number_of_casestrauma = 1803.592)
-
-melogit , nolog
-*margins center total ecmo*
-margins, at (center_totalecmo = (100(50)500) high_risk_group = 0 ECMO_dx_y_n = 1 center_admissions = 19750.05 number_of_casesonc = 930.8248 number_of_casest1318 = 98.29036  number_of_casestrauma = 1803.592)
-
-**MARGINS Trauma**
-melogit , nolog
-*margins center admissions*
-margins, at (center_admissions = (10000(1000)30000) high_risk_group = 1 ECMO_dx_y_n = 1 center_totalecmo = 361.6644 number_of_casesonc = 930.8248 number_of_casest1318 = 98.29036  number_of_casestrauma = 1803.592)
-
-melogit , nolog
-*margins center total ecmo*
-margins, at (center_totalecmo = (100(50)500) high_risk_group = 1 ECMO_dx_y_n = 1 center_admissions = 19750.05 number_of_casesonc = 930.8248 number_of_casest1318 = 98.29036  number_of_casestrauma = 1803.592)
-
-**MARGINS ONC**
-melogit , nolog
-
-**COVID MLM**
-
-*creation of multilevel model, fixed effects*
-preserve
-bysort YearOfService: drop if YearOfService ==4 | YearOfService==5
-melogit ECMO_y_n ib3.high_risk_group i.Ethnicity i.Gender c.admitageyears c.YearOfService c.center_admissions c.center_totalecmo c.number_of_casesonc c.number_of_casest1318 c.number_of_casestrauma ||HospitalNumber: , or
-restore
-
-
-*margins center admissions*
-margins, at (center_admissions = (10000(1000)30000) high_risk_group = 2 ECMO_dx_y_n = 1 center_totalecmo = 361.6644 number_of_casesonc = 930.8248 number_of_casest1318 = 98.29036  number_of_casestrauma = 1803.592)
-
-melogit , nolog
-*margins center total ecmo*
-margins, at (center_totalecmo = (100(50)500) high_risk_group = 2 ECMO_dx_y_n = 1 center_admissions = 19750.05 number_of_casesonc = 930.8248 number_of_casest1318 = 98.29036  number_of_casestrauma = 1803.592)
-
-*creation of multilevel model, random effects*
-melogit ECMO_y_n ib3.high_risk_group ib0.ECMO_dx_y_n Ethnicity Gender admitageyears YearOfService center_admissions center_totalecmo number_of_casesonc number_of_casest1318 number_of_casestrauma ||HospitalNumber: ib3.high_risk_group , or
-estimates store model3
-
-preserve
-bysort YearOfService: keep if _n==1
-browse YearOfService total_admissions annual_total_admissions
-
-tab ECMO_dx_y_n high_risk_group
-
-**--**
-
-**Total Patients**
-codebook DischargeID
-
-tab YearOfService ECMO_y_n if (high_risk_group ==0 | high_risk_group == 4 | high_risk_group ==5) 
-
-**Total ECLS Patients**
-codebook DischargeID if ECMO_y_n ==1
-**Total ECLS Patients-T13/18**
-codebook DischargeID if ECMO_y_n ==1 & (high_risk_group ==0 | high_risk_group == 4 | high_risk_group ==5)
-**Total ECLS Patients-Trauma**
-codebook DischargeID if ECMO_y_n ==1 & (high_risk_group ==1 | high_risk_group == 4 | high_risk_group ==6)
-**Total ECLS Patients-Onc/HSCT**
-codebook DischargeID if ECMO_y_n ==1 & (high_risk_group ==2 | high_risk_group == 5 | high_risk_group ==6)
-**Total ECLS Patients-Not High Risk**
-codebook DischargeID if ECMO_y_n ==1 & high_risk_group ==3
-
-
-
-**Total non-ECLS Patients**
-codebook DischargeID if ECMO_y_n ==0
-**Total ECLS Patients-T13/18**
-codebook DischargeID if ECMO_y_n ==0 & (high_risk_group ==0 | high_risk_group == 4 | high_risk_group ==5)
-**Total ECLS Patients-Trauma**
-codebook DischargeID if ECMO_y_n ==0 & (high_risk_group ==1 | high_risk_group == 4 | high_risk_group ==6)
-**Total ECLS Patients-Onc/HSCT**
-codebook DischargeID if ECMO_y_n ==0 & (high_risk_group ==2 | high_risk_group == 5 | high_risk_group ==6)
-**Total ECLS Patients-Not High Risk**
-codebook DischargeID if ECMO_y_n ==0 & high_risk_group ==3
-
+*
 **Patient Age**
 tab admitageyears ECMO_y_n
 ttest admitageyears, by(ECMO_y_n)
@@ -2484,117 +2467,7 @@ table1, by(ECMO_y_n) vars(admitageyears contn \ Ethnicity cat \ Gender cat \ hig
 
 table1, by(ecmo_type1) vars(high_risk_group cat)
 
-**GENERATING CENTER ADMISSIONS BY HIGH-RISK GROUP**
-*t1318*
-preserve
-bysort DischargeID: keep if high_risk_group ==0
-bysort HospitalNumber: egen center_admissions_T1318 = count(DischargeID)
-restore
-browsea
-~pause
 
-*trauma*
-preserve
-bysort DischargeID: keep if high_risk_group ==1
-bysort HospitalNumber: egen center_admissions_trauma = count(DischargeID)
-bysort HospitalNumber: count(HospitalNumber)
-sum center_admissions_trauma, de
-restore
-
-*onc*
-preserve
-bysort DischargeID: keep if high_risk_group ==2
-bysort HospitalNumber: egen center_admissions_onc = count(DischargeID)
-sum center_admissions_onc, de
-restore
-
-*nhr*
-preserve
-bysort DischargeID: keep if high_risk_group ==3
-bysort HospitalNumber: egen center_admissions_nhr = count(DischargeID)
-sum center_admissions_nhr, de
-restore
-
-**GENERATING CENTER ECMO BY HIGH RISK GROUP**
-
-*t1318*
-preserve
-bysort HospitalNumber: egen center_totalECMO_T1318 = count(DischargeID) if high_risk_group ==0 & ECMO_y_n ==1
-sum center_totalECMO_T1318, de
-restore
-
-*trauma*
-preserve
-bysort HospitalNumber: egen center_totalECMO_trauma = count(DischargeID) if high_risk_group ==1 & ECMO_y_n ==1
-sum center_totalECMO_trauma, de
-restore
-
-*onc*
-preserve
-bysort HospitalNumber: egen center_totalECMO_onc = count(DischargeID) if high_risk_group ==2 & ECMO_y_n ==1
-sum center_totalECMO_onc, de
-restore
-
-*nhr*
-preserve
-bysort HospitalNumber: egen center_totalECMO_nhr = count(DischargeID) if high_risk_group ==3 & ECMO_y_n ==1
-sum center_totalECMO_nhr, de
-restore
-
-*GENERATING NUMBER OF HOSPITALS HIGH RISK ECMO**
-
-*t1318*
-preserve 
-bysort DischargeID: keep if high_risk_group ==0 & ECMO_y_n ==1
-codebook HospitalNumber
-restore
-
-*trauma*
-preserve 
-bysort DischargeID: keep if high_risk_group ==1 & ECMO_y_n ==1
-codebook HospitalNumber
-restore
-
-*onc*
-preserve 
-bysort DischargeID: keep if high_risk_group ==2 & ECMO_y_n ==1
-codebook HospitalNumber
-restore
-
-*nhr*
-preserve 
-bysort DischargeID: keep if high_risk_group ==3 & ECMO_y_n ==1
-codebook HospitalNumber
-restore
-
-*GENERATING CENTERS ADMITTING BY HIGH RISK GROUP*
-
-*t1318*
-preserve 
-bysort DischargeID: keep if high_risk_group ==0 
-codebook HospitalNumber
-restore
-
-*trauma*
-preserve 
-bysort DischargeID: keep if high_risk_group ==1 
-codebook HospitalNumber
-restore
-
-*onc*
-preserve 
-bysort DischargeID: keep if high_risk_group ==2
-codebook HospitalNumber
-restore
-
-*nhr*
-preserve 
-bysort DischargeID: keep if high_risk_group ==3 
-codebook HospitalNumber
-restore
-
-
-~pause
 **probabilities for baseline characteristics**
 *baseline*
 di .0094521 /(1+.0094521) *100
@@ -2694,6 +2567,62 @@ di .0094521*1.002323/(.0094521*1.002323+1) * 100
 di .0094521* 1.000124 /(.0094521*1.000124 +1) * 100
 *upper*
 di .0094521*1.001697/(.0094521*1.001697+1) * 100
+
+*GENERATING NUMBER OF HOSPITALS HIGH RISK ECMO**
+
+*t1318*
+preserve 
+bysort DischargeID: keep if high_risk_group ==0 & ECMO_y_n ==1
+codebook HospitalNumber
+restore
+
+*trauma*
+preserve 
+bysort DischargeID: keep if high_risk_group ==1 & ECMO_y_n ==1
+codebook HospitalNumber
+restore
+
+*onc*
+preserve 
+bysort DischargeID: keep if high_risk_group ==2 & ECMO_y_n ==1
+codebook HospitalNumber
+restore
+
+*nhr*
+preserve 
+bysort DischargeID: keep if high_risk_group ==3 & ECMO_y_n ==1
+codebook HospitalNumber
+restore
+
+*GENERATING CENTERS ADMITTING BY HIGH RISK GROUP*
+
+*t1318*
+preserve 
+bysort DischargeID: keep if high_risk_group ==0 
+codebook HospitalNumber
+restore
+
+*trauma*
+preserve 
+bysort DischargeID: keep if high_risk_group ==1 
+codebook HospitalNumber
+restore
+
+*onc*
+preserve 
+bysort DischargeID: keep if high_risk_group ==2
+codebook HospitalNumber
+restore
+
+*nhr*
+preserve 
+bysort DischargeID: keep if high_risk_group ==3 
+codebook HospitalNumber
+restore
+
+
+~pause
+
 
 
  
